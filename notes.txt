@@ -1,0 +1,11 @@
+----- Create venv -----
+Windows: python -m venv venv
+
+----- Activate venv -----
+Windows: venv\Scripts\activate 
+
+----- Install Flask -----
+pip install Flask
+
+----- Run server.py file -----
+Windows: python server.py
