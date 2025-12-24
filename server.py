@@ -3,44 +3,99 @@ import sqlite3
 
 app = Flask(__name__)
 
-DB_NAME = "budget_manage.db"
+# constant
+DB_NAME = "budget_manager.db"
+
 
 def init_db():
-    conn = sqlite3.connect(DB_NAME) # opens a connection to the database file named 'budget_manger.db'
-    cursor = conn.cursor() # creates a cursor/tool that lets the us send commands(SELECT, INSERT)
+  conn = sqlite3.connect(DB_NAME) # opens a connection to the database file named "budget_manager.db"
+  cursor = conn.cursor() # creates a cursor/tool that lets us send commands (SELECT, INSERT, ...)
 
-    # Users table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-    """)
-    
-    conn.commit() # Save changes to the database
-    conn.close() # Close the connection to the database
+  # ----- users table -----
+  cursor.execute("""
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL             
+  )
+  """)
 
-@app.route("/api/health", methods=["GET"])
+  conn.commit() # Save changes to the database
+  conn.close() # Close de connection to the database
+
+
+@app.get("/api/health")
 def health_check():
-    return jsonify({"status": "OK"}), 200
+  return jsonify({"status": "OK"}), 201
+
 
 @app.post("/api/register")
 def register():
-    data = request.get_json()
-    print(data)
-    username = data.get("username")
-    password = data.get("password")
+  data = request.get_json()
+  username = data.get("username")
+  password = data.get("password")
 
-    conn = sqlite3.connect(DB_NAME) # lopens a connection to the database file named 'budget_manager.db'
-    cursor = conn.cursor() # Creates a cursor/tool that lets us send commands(SELECT, INSERT,...) to the database
-    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password)) # Executes an SQL statement
-    conn.commit()
-    conn.close() # Close the connection to the database
-    
-    return "in progress...."
+  conn = sqlite3.connect(DB_NAME) # opens the connection to the db
+  cursor = conn.cursor() # creates a cursor/tool (SELECT, INSERT)
+
+  cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password)) # Executes the SQL statement
+  conn.commit() # Save changes to the database
+  conn.close() # Close the connection to the database
+
+  return jsonify({
+    "success": True,
+    "message": "User registered successfully"  
+  }), 200
+
+
+@app.post("/api/login")
+def login():
+  data = request.get_json()
+  username = data.get("username")
+  password = data.get("password")
+
+  conn = sqlite3.connect(DB_NAME)
+  conn.row_factory = sqlite3.Row
+  cursor = conn.cursor()
+
+  cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+  user = cursor.fetchone()
+  conn.close()
+
+  if user and user["password"] == password:
+    return jsonify({
+      "user_id": user["id"], 
+      "username": user["username"]
+    }), 200
+  
+  return jsonify({
+    "success": False,
+    "message": "Invalid credentials"
+  }), 401 # Unauthorized
+
+
+@app.get("/api/users/<int:user_id>")
+def get_user_by_id(user_id):
+  conn = sqlite3.connect(DB_NAME)
+  conn.row_factory = sqlite3.Row
+  cursor = conn.cursor()
+
+  cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+  user = cursor.fetchone()
+  conn.close()
+
+  if user:
+    return jsonify({
+      "id": user["id"],
+      "username": user["username"]
+    })
+  
+  return jsonify({
+    "success": False,
+    "message": "User not found"
+  }), 404
 
 
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True)
+  init_db()
+  app.run(debug=True)
