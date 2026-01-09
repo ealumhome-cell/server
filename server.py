@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import sqlite3
 from datetime import date
 
@@ -287,3 +287,38 @@ def get_expenses():
 
     rows = cursor.fetchall()
     conn.close()
+
+
+# Frontend
+@app.get("/")
+def home():
+    return render_template("home.html")
+
+
+@app.get("/about")
+def about():
+    name = "Ashton"
+    hobbies = ["Football", "Coding", "Partys"]
+
+    return render_template("about.html", name=name, hobbies=hobbies)
+
+
+@app.get("/contact")
+def contact():
+    contact_info = {
+        "email": "strugglecoder@gmail.com",
+        "phone": "+1 619-555-9999",
+        "address": "1234 twinning oak ln, missouri city, TX"
+    }
+       
+    return render_template("contact.html", contact_info=contact_info)
+
+
+@app.get("/login")
+def login():
+    return render_template("login.html")
+
+
+if __name__ == "__main__":
+    init_db()
+    app.run(debug=True)

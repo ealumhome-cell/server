@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+    {% block content %}
+    <h1 class="text-success">About Page</h1>
+    <h2>Hello I'm {{name}}</h2>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem voluptates ullam sit earum distinctio atque quam, rerum molestiae natus ipsa. Nobis sit esse qui tempora! Natus dignissimos veritatis ea consequuntur.</p>
+
+    <h2>Hobbies List</h2>
+
+    {% for hobbies in hobbies %}
+    {{hobbie}}
+    {% endfor %}
+
+{% endblock content %}
